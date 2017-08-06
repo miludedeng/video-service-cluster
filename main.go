@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	_ "video-service-cluster/router"
+
+	"github.com/astaxie/beego"
+)
 
 func main() {
-	fmt.Println("hello")
+	beego.Run()
 }
