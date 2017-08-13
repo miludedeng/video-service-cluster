@@ -30,7 +30,7 @@ func init() {
 			Addr: NodeAddr,
 		})
 	}
-	if C.Master.Addr == NodeAddr {
+	if C.Master != nil && C.Master.Addr == NodeAddr {
 		go C.heartCheck()
 	}
 }
@@ -106,27 +106,29 @@ func RegistCurrent(n *Node) {
 		}
 		resp, err := http.Post("http://"+Master+"/cluster/regist", "application/json", strings.NewReader(string(requstBytes)))
 		if err != nil {
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 2)
 			fmt.Printf("master is %s, node add failed, will be try again 2 second later \n", Master)
 			continue
 		}
 		var result *Result
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 2)
 			fmt.Printf("master is %s, node add failed, error message is %s, will be try again 2 second later \n", Master, fmt.Sprintf("%s", err))
 			continue
 		}
 		err = json.Unmarshal(body, &result)
 		if err != nil {
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 2)
 			fmt.Printf("master is %s, node add failed, error message is %s, will be try again 2 second later \n", Master, fmt.Sprintf("%s", err))
 			continue
 		}
-		if "success" != result.Message {
-			fmt.Printf("master is %s, node add %s success", Master, n.Addr)
+		if "success" == result.Message {
+			fmt.Printf("master is %s, node add %s success\n", Master, n.Addr)
 		} else {
+			time.Sleep(time.Second * 2)
 			fmt.Printf("master is %s, node add failed, error message is %s, will be try again 2 second later \n", Master, result.Message)
 		}
+		break
 	}
 }
