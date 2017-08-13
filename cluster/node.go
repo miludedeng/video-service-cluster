@@ -15,6 +15,7 @@ type Node struct {
 	tryCount  int
 }
 
+// heartCheck 心跳检测
 func (n *Node) heartCheck() bool {
 	result := false
 	client := getClinet()
