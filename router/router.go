@@ -10,6 +10,7 @@ import (
 func init() {
 	beego.Router("/cluster/", &controllers.ClusterController{}, "get:Index")
 	beego.Router("/cluster/regist", &controllers.ClusterController{}, "post:Regist")
+	beego.Router("/cluster/sync", &controllers.ClusterController{}, "post:Sync")
 	beego.Router("/cluster/health", &controllers.ClusterController{}, "get:HealthCheck")
 	beego.Router("/cluster/heart", &controllers.ClusterController{}, "get:HeartCheck")
 }

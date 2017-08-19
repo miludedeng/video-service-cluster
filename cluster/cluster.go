@@ -25,6 +25,7 @@ func init() {
 			Addr: NodeAddr,
 		}
 		C.Regist(C.Master)
+		C.sync()
 	} else {
 		RegistCurrent(&Node{
 			Addr: NodeAddr,
@@ -95,6 +96,47 @@ func (c *Cluster) heartCheck() {
 
 type Result struct {
 	Message string `message`
+}
+
+// sync 同步集群数据到其他节点
+func (c *Cluster) sync() {
+	requstBytes, err := json.Marshal(C)
+	if err != nil {
+		fmt.Printf("node config %s is error\n", string(requstBytes))
+		break
+	}
+	for {
+		for _, node := range c.Nodes {
+			if node.Addr == c.Master.Addr {
+				continue
+			}
+			resp, err := http.Post("http://"+node.Addr+"/cluster/sync", "application/json", strings.NewReader(string(requstBytes)))
+			if err != nil {
+				fmt.Printf("node: %s, node addr %s is error\n", node.Addr, fmt.Sprintf("%s", err))
+				break
+			}
+			var result *Result
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				time.Sleep(time.Second * 2)
+				fmt.Printf("cluster sync failed,  node addr is %s, error message is %s, will be try again 2 second later \n", node.Addr, fmt.Sprintf("%s", err))
+				continue
+			}
+			err = json.Unmarshal(body, &result)
+			if err != nil {
+				time.Sleep(time.Second * 2)
+				fmt.Printf("cluster sync failed, node addr is %s, error message is %s, will be try again 2 second later \n",node.Addr fmt.Sprintf("%s", err))
+				continue
+			}
+			if "success" == result.Message {
+				fmt.Printf("cluster sync success, node %s\n", n.Addr)
+			} else {
+				time.Sleep(time.Second * 2)
+				fmt.Printf("master is %s, node add failed, error message is %s, will be try again 2 second later \n", Master, result.Message)
+			}
+		}
+		time.Sleep(5 * time.Second)
+	}
 }
 
 func RegistCurrent(n *Node) {

@@ -38,8 +38,12 @@ func (controller *ClusterController) Regist() {
 	controller.ServeJSON(false)
 }
 
-// HealthCheck 健康检测
-func (controller *ClusterController) HealthCheck() {
+// Sync 集群信息同步
+func (controller *ClusterController) Sync() {
+	controller.Data["json"] = map[string]interface{}{
+		"status": "success",
+	}
+	controller.ServeJSON(false)
 }
 
 // HealthCheck 心跳检测
